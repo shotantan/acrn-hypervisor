@@ -56,6 +56,7 @@
 #define CPU_REGS_OFFSET_TVAL			0x118
 #define CPU_REGS_OFFSET_SCRATCH			0x120
 
-#define CPU_REGS_OFFSET_LAST 			CPU_REGS_OFFSET_SCRATCH
+/* Total context area size (struct cpu_regs). */
+#define CPU_REGS_OFFSET_LAST			(CPU_REGS_OFFSET_SCRATCH + 8)
 
 #endif /* RISCV_OFFSET_H */
