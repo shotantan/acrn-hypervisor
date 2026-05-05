@@ -106,6 +106,7 @@ int32_t multiboot2_to_acrn_bi(struct acrn_boot_info *abi, void *mb2_info)
 			(void)strncpy_s((void *)(abi->loader_name), MAX_LOADER_NAME_SIZE, str,
 						strnlen_s(str, (MAX_LOADER_NAME_SIZE - 1U)));
 			break;
+		case MULTIBOOT2_TAG_TYPE_ACPI_OLD:
 		case MULTIBOOT2_TAG_TYPE_ACPI_NEW:
 			abi->acpi_rsdp_va = ((struct multiboot2_tag_new_acpi *)mb2_tag)->rsdp;
 			break;

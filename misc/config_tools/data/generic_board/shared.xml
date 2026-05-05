@@ -75,7 +75,7 @@
     <os_config>
       <kern_type>KERNEL_BZIMAGE</kern_type>
       <kern_mod>Linux_bzImage</kern_mod>
-      <ramdisk_mod/>
+      <ramdisk_mod>Linux_initrd</ramdisk_mod>
       <bootargs>  rw rootwait root=/dev/nvme0n1p2 console=tty0 console=ttyS0 consoleblank=0 no_timer_check quiet loglevel=3
         i915.nuclear_pageflip=1 swiotlb=131072
       </bootargs>
@@ -123,6 +123,7 @@
     <load_order>POST_LAUNCHED_VM</load_order>
     <vm_type>RTVM</vm_type>
     <name>POST_RT_VM1</name>
+    <own_pcpu>y</own_pcpu>
     <lapic_passthrough>y</lapic_passthrough>
     <cpu_affinity>
       <pcpu>
