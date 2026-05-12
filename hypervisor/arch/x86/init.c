@@ -12,7 +12,33 @@
 #include <asm/vmx.h>
 #include <asm/guest/vm.h>
 #include <logmsg.h>
+
+#pragma GCC diagnostic ignored "-Wunused-function"
+static void delay_n_sec(uint64_t sec) {
+    if (sec == 0) return;
+    uint64_t start, current;
+    asm volatile("rdtsc\n\tshl $32, %%rdx\n\tor %%rdx, %%rax" : "=a" (start) : : "rdx");
+    while (1) {
+        asm volatile("rdtsc\n\tshl $32, %%rdx\n\tor %%rdx, %%rax" : "=a" (current) : : "rdx");
+        if ((current - start) > (sec * 2000000000ULL)) { // Approx 2GHz
+            break;
+        }
+        asm volatile("pause");
+    }
+}
+static void trap_reboot(uint64_t sec) {
+    delay_n_sec(sec);
+    asm volatile("movb $0x11, %al; movw $0x0cf9, %dx; outb %al, %dx");
+}
+
+/* 
+ * BISECTION TRAP CONFIGURATION
+ * Set ACTIVE_TRAP to choose which point to reboot at.
+ */
+#define ACTIVE_TRAP 0
+
 #include <asm/seed.h>
+
 #include <asm/boot/ld_sym.h>
 #include <boot.h>
 
@@ -95,22 +121,40 @@ void init_primary_pcpu(void)
 	(void)memset(&ld_bss_start, 0U, (size_t)(&ld_bss_end - &ld_bss_start));
 
 	init_acrn_boot_info(boot_regs);
+#if ACTIVE_TRAP == 5
+        trap_reboot(5);
+#endif
 
 	init_debug_pre();
+#if ACTIVE_TRAP == 10
+        trap_reboot(10);
+#endif
 
 	if (sanitize_acrn_boot_info(get_acrn_boot_info()) != 0) {
 		panic("Sanitize boot info failed!");
 	}
 
 	init_pcpu_pre(true);
+#if ACTIVE_TRAP == 15
+        trap_reboot(15);
+#endif
 
 	init_seed();
+#if ACTIVE_TRAP == 20
+        trap_reboot(20);
+#endif
 	init_misc();
+#if ACTIVE_TRAP == 25
+        trap_reboot(25);
+#endif
 
 	/* Switch to run-time stack */
 	rsp = (uint64_t)(&get_cpu_var(stack)[CONFIG_STACK_SIZE - 1]);
 	rsp &= ~(CPU_STACK_ALIGN - 1UL);
-	SWITCH_TO(rsp, init_pcpu_comm_post);
+	#if ACTIVE_TRAP == 30
+        trap_reboot(30);
+#endif
+        SWITCH_TO(rsp, init_pcpu_comm_post);
 }
 
 void init_secondary_pcpu(void)

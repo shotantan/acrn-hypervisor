@@ -9,7 +9,7 @@ set -e
 
 SCENARIO=(my_scenario)
 
-BOARD=(my_board)
+BOARD=(wushu)
 
 #Build info End
 

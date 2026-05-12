@@ -869,8 +869,8 @@ int32_t rdmsr_vmexit_handler(struct acrn_vcpu *vcpu)
 			 */
 			err = read_vmx_msr(vcpu, msr, &v);
 		} else {
-			pr_warn("%s(): vm%d vcpu%d reading MSR %lx not supported",
-				__func__, vcpu->vm->vm_id, vcpu->vcpu_id, msr);
+			// pr_warn("%s(): vm%d vcpu%d reading MSR %lx not supported",
+				// __func__, vcpu->vm->vm_id, vcpu->vcpu_id, msr);
 			err = -EACCES;
 			v = 0UL;
 		}
@@ -1346,8 +1346,8 @@ int32_t wrmsr_vmexit_handler(struct acrn_vcpu *vcpu)
 		if (is_x2apic_msr(msr)) {
 			err = vlapic_x2apic_write(vcpu, msr, v);
 		} else {
-			pr_warn("%s(): vm%d vcpu%d writing MSR %lx not supported",
-				__func__, vcpu->vm->vm_id, vcpu->vcpu_id, msr);
+			// pr_warn("%s(): vm%d vcpu%d writing MSR %lx not supported",
+				// __func__, vcpu->vm->vm_id, vcpu->vcpu_id, msr);
 			err = -EACCES;
 		}
 		break;

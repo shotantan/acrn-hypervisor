@@ -315,7 +315,8 @@ static void assign_vdev_pt_iommu_domain(struct pci_vdev *vdev)
 	ret = move_pt_device(NULL, vm->iommu, (uint8_t)vdev->pdev->bdf.bits.b,
 		(uint8_t)(vdev->pdev->bdf.value & 0xFFU));
 	if (ret != 0) {
-		panic("failed to assign iommu device!");
+		pr_fatal("failed to assign iommu device %02x:%02x.%x! ret=%d\n", vdev->pdev->bdf.bits.b, vdev->pdev->bdf.bits.d, vdev->pdev->bdf.bits.f, ret);
+                panic("failed to assign iommu device!");
 	}
 }
 

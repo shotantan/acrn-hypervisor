@@ -20,6 +20,7 @@
 #define ACPI_MADT_TYPE_IOAPIC       1U
 #define ACPI_MADT_ENABLED           1U
 #define ACPI_MADT_TYPE_LOCAL_APIC_NMI 4U
+#define ACPI_MADT_TYPE_LOCAL_X2APIC   9U
 
 #define ACPI_DMAR_TYPE_HARDWARE_UNIT           0U
 #define ACPI_DMAR_TYPE_RESERVED_MEMORY           1U
@@ -175,6 +176,14 @@ struct acpi_madt_local_apic {
 	/* Processor's local APIC id */
 	uint8_t                        id;
 	uint32_t                       lapic_flags;
+} __packed;
+
+struct acpi_madt_local_x2apic {
+	struct acpi_subtable_header    header;
+	uint16_t                       reserved;
+	uint32_t                       id;
+	uint32_t                       lapic_flags;
+	uint32_t                       uid;
 } __packed;
 
 struct acpi_madt_local_apic_nmi {

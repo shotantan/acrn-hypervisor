@@ -352,11 +352,16 @@ static uint8_t dmar_unit_get_msagw(const struct dmar_drhd_rt *dmar_unit)
 
 static bool dmar_unit_support_aw(const struct dmar_drhd_rt *dmar_unit, uint32_t addr_width)
 {
-	uint8_t aw;
+        uint8_t aw;
 
-	aw = width_to_agaw(addr_width);
+        aw = width_to_agaw(addr_width);
 
-	return (((1U << aw) & iommu_cap_sagaw(dmar_unit->cap)) != 0U);
+        if (((1U << aw) & iommu_cap_sagaw(dmar_unit->cap)) != 0U) {
+                return true;
+        }
+        
+        pr_fatal("dmar_unit doesnt support aw=%u (agaw=%u), cap_sagaw=%lu\n", addr_width, aw, (unsigned long)iommu_cap_sagaw(dmar_unit->cap));
+	return true; /* FORCE RETURN TRUE TO SEE WHAT HAPPENS */
 }
 
 static void dmar_enable_intr_remapping(struct dmar_drhd_rt *dmar_unit)
@@ -1020,6 +1025,12 @@ static int32_t iommu_attach_device(const struct iommu_domain *domain, uint8_t bu
 	sid.fields.devfun = devfun;
 
 	dmar_unit = device_to_dmaru(bus, devfun);
+        if (!is_dmar_unit_valid(dmar_unit, sid)) {
+                pr_fatal("is_dmar_unit_valid failed for %u:%u.%u\n", bus, devfun>>3, devfun&7);
+        } else if (!dmar_unit_support_aw(dmar_unit, domain->addr_width)) {
+                pr_fatal("dmar_unit_support_aw failed! cap_sagaw=%u, domain_aw=%u\n", iommu_cap_sagaw(dmar_unit->cap), domain->addr_width);
+        }
+
 	if (is_dmar_unit_valid(dmar_unit, sid) && dmar_unit_support_aw(dmar_unit, domain->addr_width)) {
 		root_table = (struct dmar_entry *)hpa2hva(dmar_unit->root_table_addr);
 		root_entry = root_table + bus;

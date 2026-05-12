@@ -176,6 +176,7 @@ local_parse_madt(struct acpi_table_madt *madt, uint32_t lapic_id_array[MAX_PCPU_
 {
 	uint16_t pcpu_num = 0U;
 	struct acpi_madt_local_apic *processor;
+        struct acpi_madt_local_x2apic *processor_x2;
 	struct acpi_table_madt *madt_ptr;
 	void *first, *end, *iterator;
 	struct acpi_subtable_header *entry;
@@ -191,6 +192,15 @@ local_parse_madt(struct acpi_table_madt *madt, uint32_t lapic_id_array[MAX_PCPU_
 			break;
 		}
 
+		if (entry->type == ACPI_MADT_TYPE_LOCAL_X2APIC) {
+			processor_x2 = (struct acpi_madt_local_x2apic *)iterator;
+			if ((processor_x2->lapic_flags & ACPI_MADT_ENABLED) != 0U) {
+				if (pcpu_num < MAX_PCPU_NUM) {
+					lapic_id_array[pcpu_num] = processor_x2->id;
+				}
+				pcpu_num++;
+			}
+		} else
 		if (entry->type == ACPI_MADT_TYPE_LOCAL_APIC) {
 			processor = (struct acpi_madt_local_apic *)iterator;
 			if ((processor->lapic_flags & ACPI_MADT_ENABLED) != 0U) {
@@ -211,8 +221,13 @@ uint16_t parse_madt(uint32_t lapic_id_array[MAX_PCPU_NUM])
 	uint16_t ret = 0U;
 	struct acpi_table_madt *madt = (struct acpi_table_madt *)get_acpi_tbl(ACPI_SIG_MADT);
 
-	if (madt != NULL) {
-		ret = local_parse_madt(madt, lapic_id_array);
+        pr_fatal("CRASH DEBUG: madt_ptr=%p", madt);
+
+        if (madt != NULL) {
+                ret = local_parse_madt(madt, lapic_id_array);
+                pr_fatal("CRASH DEBUG: local_parse_madt returned %u CPUs", ret);
+        } else {
+                pr_fatal("CRASH DEBUG: MADT is NULL!");
 	}
 
 	return ret;
